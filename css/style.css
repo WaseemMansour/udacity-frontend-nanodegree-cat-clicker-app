@@ -1,0 +1,8 @@
+.cats {
+    list-style: none;
+    padding: 0;
+}
+
+.cats li img {
+    max-width: 100%;
+}
