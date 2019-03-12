@@ -1,50 +1,118 @@
 /**
  * Created by MR.WASEEM on 3/9/2019.
  */
-class Cat {
-    constructor(name = 'Kitty', image = 'img/cat.jpg') {
-        this.name = name;
-        this.image = image;
-        this.clicks = 0;
+(function(){
+    class Cat {
+        constructor(name = 'Kitty', image = 'img/cat.jpg') {
+            this.name = name;
+            this.image = image;
+            this.clicks = 0;
+        }
+
+        click() {
+            this.clicks++
+        }
     }
 
-    click() {
-        this.clicks++
-    }
-}
+    const model = {
+        cats: [],
+        // populate cats by instantiating them from Cats Class and push to Cats array
+        init: function() {
+            const cat1 = new Cat();
+            const cat2 = new Cat('Meshmesh', 'img/cat2.jpg');
+            const cat3 = new Cat('Anoush', 'img/cat3.jpg');
+            const cat4 = new Cat('Bosbos', 'img/cat4.jpg');
+            const cat5 = new Cat('Nancy', 'img/cat5.jpg');
+            this.cats.push(cat1, cat2, cat3, cat4, cat5);
+        },
+        getAllCats: function() {
+            return this.cats;
+        },
+        selectCat: function(i) {
+            return this.getAllCats()[i];
+        }
+    };
 
-const container = document.querySelector('.cats');
+    const octopus = {
+        init: function() {
+            model.init();
+            catListView.init();
+            catPreviewView.init();
+        },
+        getAllCats: function() {
+            return model.getAllCats();
+        },
+        selectCat: function(i) {
+            return model.selectCat(i);
+        }
+    };
 
-let cats = [];
-let cat1 = new Cat();
-let cat2 = new Cat('Meshmesh', 'img/cat2.jpg');
-cats.push(cat1, cat2);
+    const catListView = {
+        catsList: document.querySelector('.cats'),
+        init: function() {
+            this.catsList.addEventListener('click', function(e){
+                const target = e.target;
+                if (target.parentNode.classList.contains('cat-instance')) {
+                    const itemIndex = target.parentNode.getAttribute('data-cat-id');
 
-function initApp() {
-    const frag = document.createDocumentFragment();
+                    catPreviewView.render(itemIndex);
+                }
 
-    for (const [index, cat] of cats.entries()) {
+            }, false);
+            catListView.render();
+        },
+        render: function() {
+            const frag = document.createDocumentFragment();
+            const cats = octopus.getAllCats();
 
-        let el = document.createElement('li');
-        el.className = 'col-md-6 cat-instance';
-        el.setAttribute('data-cat-id', index);
-        el.innerHTML = `<h2>${cat.name}</h2><img class="cute-cat mt-2" src="${cat.image}" alt="${cat.name}"><p>Clicks : <span class="count">${cat.clicks}</span></p>`
+            for (const [index, cat] of cats.entries()) {
+                const el = document.createElement('li');
+                el.className = 'cat-instance';
+                el.setAttribute('data-cat-id', index);
+                el.innerHTML = `<a href="javascript:void(0)">${cat.name}</a>`;
 
-        frag.appendChild(el);
-    }
-    container.appendChild(frag);
-}
+                frag.appendChild(el);
+            }
+            this.catsList.appendChild(frag);
+        }
+    };
 
-initApp();
+    const catPreviewView = {
+        preview: document.querySelector('.cat-preview'),
+        init: function() {
+            this.preview.addEventListener('click', function(e){
+                const target = e.target;
+                if (target.classList.contains('cute-cat')) {
+                    const itemIndex = target.parentNode.getAttribute('data-cat-id');
+                    const catCount = target.parentNode.querySelector('.count');
+                    const cats = octopus.getAllCats();
 
-container.addEventListener('click', function(e){
-    const target = e.target;
-    const catsNodeList = document.querySelectorAll('.cats li');
+                    cats[itemIndex].clicks++;
+                    catCount.innerHTML = cats[itemIndex].clicks;
+                }
+            });
 
-    if (target.parentNode.classList.contains('cat-instance')) {
-        const itemIndex = target.parentNode.getAttribute('data-cat-id');
-        const catCount = catsNodeList[itemIndex].querySelector('.count');
-        cats[itemIndex].clicks++;
-        catCount.innerHTML = cats[itemIndex].clicks;
-    }
-}, false);
+            this.preview.setAttribute('data-cat-id', 0);
+            catPreviewView.render(0);
+
+
+
+        },
+        render: function(i) {
+            const catName = document.querySelector('.cat-name');
+            const catImage = document.querySelector('.cute-cat');
+            const catClicks = document.querySelector('.count');
+
+            const selectedCat = octopus.selectCat(i);
+            this.preview.setAttribute('data-cat-id', i);
+
+            catName.innerHTML = selectedCat.name;
+            catImage.setAttribute('src', selectedCat.image);
+            catImage.setAttribute('alt', selectedCat.name);
+            catClicks.innerHTML = selectedCat.clicks;
+        }
+    };
+
+    octopus.init();
+
+})();
